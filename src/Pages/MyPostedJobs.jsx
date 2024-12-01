@@ -1,19 +1,38 @@
 import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../Provider/AuthProvider"
 import axios from "axios";
+import toast from "react-hot-toast";
+
 
 const MyPostedJobs = () => {
   const {user} = useContext(AuthContext);
   const [jobs , setJobs] = useState([])
 
   useEffect(()=>{
-    const getData = async()=>{
-      const {data} = await axios(`http://localhost:5000/jobs/${user?.email}`)
-      setJobs(data)
-    }
-    getData()
-  },[user])
    
+    getData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[user])
+  
+  const getData = async()=>{
+    const {data} = await axios(`${import.meta.env.VITE_API_URL}/jobs/${user?.email}`)
+    setJobs(data)
+  }
+
+   const handleDelete =async (id)=>{
+try{
+  const {data} = await axios.delete(`${import.meta.env.VITE_API_URL}/jobs/${id}`)
+  console.log(data)
+  toast.success("Delete Successfully")
+
+  // Refresh UI
+  getData()
+  
+}catch(error){
+  console.log(error)
+  toast.error(error.message)
+}
+   }
 
 
     return (
@@ -22,7 +41,7 @@ const MyPostedJobs = () => {
           <h2 className='text-lg font-medium text-gray-800 '>My Posted Jobs</h2>
   
           <span className='px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full '>
-            0 Jobs
+            {jobs.length} Job
           </span>
         </div>
   
@@ -77,17 +96,17 @@ const MyPostedJobs = () => {
                     </tr>
                   </thead>
                   <tbody className='bg-white divide-y divide-gray-200 '>
-                    <tr>
+                  {jobs.map(job =>   <tr key={job._id}>
                       <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                        Build Dynamic Website
+                        {job.job_title}
                       </td>
   
                       <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                        10/04/2024
+                      {new Date(job.deadline).toLocaleDateString()}
                       </td>
   
                       <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                        $100-$200
+                        ${job.min_price} - ${job.max_price}
                       </td>
                       <td className='px-4 py-4 text-sm whitespace-nowrap'>
                         <div className='flex items-center gap-x-2'>
@@ -95,19 +114,20 @@ const MyPostedJobs = () => {
                             className='px-3 py-1 rounded-full text-blue-500 bg-blue-100/60
                              text-xs'
                           >
-                            Web Development
+                           {job.category}
                           </p>
                         </div>
                       </td>
                       <td
-                        title=''
+                        title={job.description}
                         className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'
                       >
-                        Lorem ipsum, dolor si adipisicing elit. Ex, provident?..
+                       
+                       {job.description.substring(0,30)}....
                       </td>
                       <td className='px-4 py-4 text-sm whitespace-nowrap'>
                         <div className='flex items-center gap-x-6'>
-                          <button className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'>
+                          <button onClick={()=>handleDelete(job._id)} className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'>
                             <svg
                               xmlns='http://www.w3.org/2000/svg'
                               fill='none'
@@ -142,7 +162,7 @@ const MyPostedJobs = () => {
                           </button>
                         </div>
                       </td>
-                    </tr>
+                    </tr>)}
                   </tbody>
                 </table>
               </div>
