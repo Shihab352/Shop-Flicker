@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../Provider/AuthProvider"
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 
 const MyPostedJobs = () => {
@@ -14,11 +15,13 @@ const MyPostedJobs = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[user])
   
+   // Get all jobs posted by e specific user via buyer email
   const getData = async()=>{
     const {data} = await axios(`${import.meta.env.VITE_API_URL}/jobs/${user?.email}`)
     setJobs(data)
   }
 
+// Delete Posted Jobs
    const handleDelete =async (id)=>{
 try{
   const {data} = await axios.delete(`${import.meta.env.VITE_API_URL}/jobs/${id}`)
@@ -27,7 +30,7 @@ try{
 
   // Refresh UI
   getData()
-  
+
 }catch(error){
   console.log(error)
   toast.error(error.message)
@@ -144,7 +147,8 @@ try{
                             </svg>
                           </button>
   
-                          <button className='text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'>
+                         <Link to={`/update/${job._id}`}>
+                         <button className='text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'>
                             <svg
                               xmlns='http://www.w3.org/2000/svg'
                               fill='none'
@@ -160,6 +164,7 @@ try{
                               />
                             </svg>
                           </button>
+                         </Link>
                         </div>
                       </td>
                     </tr>)}
